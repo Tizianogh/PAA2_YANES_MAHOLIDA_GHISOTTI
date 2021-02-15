@@ -15,6 +15,7 @@ public class MainClient extends Thread {
 
         BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in));
         PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+        BufferedReader fromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
         while (true) {
             System.out.println("> ");
@@ -24,6 +25,8 @@ public class MainClient extends Thread {
                 break;
             }
             out.println(command);
+
+            System.out.println(fromServer.readLine());
         }
 
         socket.close();
