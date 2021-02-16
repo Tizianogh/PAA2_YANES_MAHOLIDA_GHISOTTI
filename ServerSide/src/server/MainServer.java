@@ -1,6 +1,6 @@
 package server;
 
-import model.ListeDesVentes;
+import model.Gestionnaire;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -12,7 +12,7 @@ public class MainServer {
 
     public static void main(String[] args) throws IOException {
         ServerSocket socket = new ServerSocket(PORT);
-        ListeDesVentes enchere = new ListeDesVentes();
+        Gestionnaire enchere = new Gestionnaire();
 
         while (true) {
             System.out.println("[SERVER] EN ATTENTE");
