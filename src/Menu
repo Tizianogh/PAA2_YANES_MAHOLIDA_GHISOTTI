@@ -1,0 +1,61 @@
+Veuillez saisir un pseudo s'il vous plaît :
+> Tiziano
+--------------------------------------------------------------------------------
+Veuillez saisir un chiffre correspondant au numéro de l'action :
+                        1- Créer une vente
+                        2- Afficher les ventes en cours
+                        3- Enchérir
+                        4- Historique des ventes terminees
+                        5- Quitter
+
+> 1
+
+Saisissez le libelle de votre vente
+> Vélo
+Saisissez le prix de base
+> 10
+Mise en enchère réussie
+
+--------------------------------------------------------------------------------
+Veuillez saisir un chiffre correspondant au numéro de l'action :
+                        1- Créer une vente
+                        2- Afficher les ventes en cours
+                        3- Enchérir
+                        4- Historique des ventes terminees
+                        5- Quitter
+
+> 2
+
+Libellé, prix, propiétaire, dernier enchérisseur
+#1 - Vélo, 10, Albert, Patrick
+#2 - Voiture, 20, Robert, Lucas
+#3 - Avion, 30, Marc, Thomas
+
+--------------------------------------------------------------------------------
+Veuillez saisir un chiffre correspondant au numéro de l'action :
+                        1- Créer une vente
+                        2- Afficher les ventes en cours
+                        3- Enchérir
+                        4- Historique des ventes terminees
+                        5- Quitter
+
+> 3
+
+Libellé, prix, propiétaire, dernier enchérisseur
+#1 - Vélo, 10, Albert, Patrick
+#2 - Voiture, 20, Robert, Lucas
+#3 - Avion, 30, Marc, Thomas
+
+Saisissez le numéro de la vente :
+> 1
+Saisissez le prix souhaité, il doit être égale ou supérier à {{prix}}
+> 30
+Offre accepté
+
+--------------------------------------------------------------------------------
+Veuillez saisir un chiffre correspondant au numéro de l'action :
+                        1- Créer une vente
+                        2- Afficher les ventes en cours
+                        3- Enchérir
+                        4- Historique des ventes terminees
+                        5- Quitter

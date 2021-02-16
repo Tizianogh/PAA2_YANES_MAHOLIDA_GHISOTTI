@@ -9,9 +9,9 @@ public class Vente {
     private String proprietaire;
     private UUID idVente;
     private String libelle;
-    private float prix;
+    private int prix;
 
-    public Vente(float prixBase, String libelle, String proprietaire) {
+    public Vente(int prixBase, String libelle, String proprietaire) {
         this.idVente = UUID.randomUUID();
         this.prix = prix;
         this.libelle = libelle;
@@ -26,11 +26,11 @@ public class Vente {
         return libelle;
     }
 
-    public float getPrix() {
+    public int getPrix() {
         return prix;
     }
 
-    private void setPrix(float nouveauPrix) {
+    private void setPrix(int nouveauPrix) {
         if (nouveauPrix > this.prix) {
             this.prix = nouveauPrix;
         } else {

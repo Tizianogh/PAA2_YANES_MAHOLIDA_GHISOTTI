@@ -18,17 +18,20 @@ public class MainClient extends Thread {
         BufferedReader fromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
         while (true) {
+            System.out.println(fromServer.readLine());
+
             System.out.println("> ");
             String command = keyboard.readLine();
 
-            if (command.equals("exist")) {
+            if (command.equals("quit")) {
                 break;
             }
             out.println(command);
+            do {
+                System.out.println(fromServer.readLine());
+            } while (fromServer.ready());
 
-            System.out.println(fromServer.readLine());
         }
-
         socket.close();
     }
 }
