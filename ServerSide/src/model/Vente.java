@@ -1,8 +1,5 @@
 package model;
 
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.Locale;
 import java.util.UUID;
 
 public class Vente {
@@ -43,11 +40,8 @@ public class Vente {
 
     @Override
     public String toString() {
-        return "Vente{" +
-                "proprietaire='" + proprietaire + '\'' +
-                ", idVente=" + idVente +
-                ", libelle='" + libelle + '\'' +
-                ", prix=" + prix +
-                '}';
+        String inter = "/";
+        if (encherisseur != null) inter = encherisseur;
+        return libelle + ", " + prix + ", " + proprietaire + ", " + inter;
     }
 }

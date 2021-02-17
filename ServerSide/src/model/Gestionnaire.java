@@ -1,6 +1,9 @@
 package model;
 
+import server.HandleServer;
+
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 public class Gestionnaire {
@@ -15,6 +18,7 @@ public class Gestionnaire {
      */
     ConcurrentLinkedQueue<Vente> ventes = new ConcurrentLinkedQueue<Vente>();
     ConcurrentSkipListSet<String> users = new ConcurrentSkipListSet<String>();
+    ConcurrentSkipListMap<String, HandleServer> mapThreads = new ConcurrentSkipListMap<>();
 
     /**
      * Cette méthode sert à rajouter une vente dans la liste synchronisé "ventes"
@@ -34,11 +38,10 @@ public class Gestionnaire {
      */
     public synchronized String toString() {
         String chaine = "";
-        int id = 0;
         for (Vente v : ventes) {
-            chaine = chaine + (id++) + "- " + v + "\n";
+            chaine = chaine + v + "\n";
         }
-        return chaine;
+        return "Liste des ventes :\nIntitulé, meilleure offre, vendeur, meilleur enchérisseur\n" + chaine;
     }
 
     /**
@@ -58,5 +61,23 @@ public class Gestionnaire {
             users.add(pseudo);
             return true;
         }
+    }
+
+    public synchronized Boolean connexionUser(String pseudo) {
+        if (users.contains(pseudo)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public synchronized void newThread(String pseudo, HandleServer thread) {
+        HandleServer ancienThread = mapThreads.get(pseudo);
+
+        if (ancienThread != null) {
+            mapThreads.remove(pseudo);
+            ancienThread.stop();
+        }
+        mapThreads.put(pseudo, thread);
     }
 }

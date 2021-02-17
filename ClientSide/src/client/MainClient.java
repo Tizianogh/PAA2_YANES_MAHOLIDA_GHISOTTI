@@ -34,8 +34,6 @@ public class MainClient extends Thread {
                 break;
             }
             out.println(command);
-
-
         }
         socket.close();
     }

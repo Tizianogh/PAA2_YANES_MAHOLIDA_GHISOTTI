@@ -5,7 +5,7 @@ import model.Vente;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Base64;
+import java.util.Objects;
 
 public class HandleServer extends Thread {
 
@@ -13,6 +13,7 @@ public class HandleServer extends Thread {
     private PrintWriter out;
     private Socket socket;
     private Gestionnaire gestionnaire;
+    private String name;
 
     /**
      * Le constructeur prend en paramètre la classe gestionnaire.
@@ -40,12 +41,6 @@ public class HandleServer extends Thread {
     private String messageClient(String param) {
         String msg = "";
         switch (param) {
-            case "pseudo":
-                msg = "Veuillez entrer un pseudo s'il vous plaît : ";
-                break;
-            case "pseudoExistant":
-                msg = "Pseudo déjà existant, veuillez en entrer un autre";
-                break;
             case "menu":
                 msg = "-----------------------------------------------------------------\n" +
                         "Veuillez saisir un chiffre correspondant au numéro de l'action : \n" +
@@ -55,6 +50,21 @@ public class HandleServer extends Thread {
                         "4- Historique des ventes terminees\n" +
                         "5- Menu\n" +
                         "6- Quitter";
+                break;
+            case "begin":
+                msg = "Avez-vous un compte ? (Y/N)";
+                break;
+            case "connexion":
+                msg = "Saisissez le pseudo de votre compte :";
+                break;
+            case "pseudoInexistant":
+                msg = "Compte inexistant, veuillez ressaisir votre pseudo";
+                break;
+            case "nouveauCompte":
+                msg = "Veuillez entrer un pseudo s'il vous plaît : ";
+                break;
+            case "pseudoExistant":
+                msg = "Pseudo déjà existant, veuillez en entrer un autre";
                 break;
             case "libelleVente":
                 msg = "Saisissez le libelle de votre vente";
@@ -68,14 +78,45 @@ public class HandleServer extends Thread {
             case "prixEnchere":
                 msg = "Saisissez le prix souhaité, il doit être égale ou supérier à ..";
                 break;
-            case "enteteEnchere":
-                msg = "Libellé, prix, propiétaire, dernier enchérisseur\n";
-                break;
             default:
-                msg = "Saisi incorrect";
+                msg = "Saisie incorrecte";
                 break;
         }
         return msg;
+    }
+
+    private void connexion() throws IOException {
+        String pseudo;
+        Boolean first = true;
+        do {
+            if (first) {
+                out.println(this.messageClient("connexion"));
+                first = false;
+            } else {
+                out.println(this.messageClient("pseudoInexistant"));
+            }
+            pseudo = in.readLine();
+        } while (!gestionnaire.connexionUser(pseudo));
+        //Boucle jusqu'à avoir un pseudo existant
+        this.gestionnaire.newThread(pseudo, this);
+    }
+
+    public void creationCompte() throws IOException {
+        String pseudo;
+        Boolean first = true; //first ittération ou pas
+        do {
+            if (first) {
+                out.println(this.messageClient("nouveauCompte"));
+                first = false;
+            } else {
+                out.println(this.messageClient("pseudoExistant"));
+            }
+            pseudo = in.readLine();
+        } while (!gestionnaire.newUser(pseudo)); //Boucle jusqu'à avoir un pseudo inexistant
+
+        this.name = pseudo;
+
+        this.gestionnaire.newThread(name, this);
     }
 
     /**
@@ -85,19 +126,19 @@ public class HandleServer extends Thread {
      */
     public void run() {
         try {
-            Boolean first = true;
-            String pseudo;
-            do {
-                if (first) {
-                    out.println(this.messageClient("pseudo"));
-                    first = false;
+            while (true) { //boucle tant qu'il n'y pas de bonne réponse (y ou n)
+                out.println(this.messageClient("begin"));
+                String choixConnexion = in.readLine();
+                if (choixConnexion.equalsIgnoreCase("y")) {
+                    this.connexion();
+                    break;
+                } else if (choixConnexion.equalsIgnoreCase("n")) {
+                    this.creationCompte();
+                    break;
                 } else {
-                    out.println(this.messageClient("pseudoExistant"));
+                    out.println(this.messageClient("error"));
                 }
-                pseudo = in.readLine();
-            } while (!gestionnaire.newUser(pseudo));
-
-            this.setName(pseudo);
+            }
 
             out.println(this.messageClient("menu"));
             while (true) {
@@ -113,7 +154,7 @@ public class HandleServer extends Thread {
                         out.println(vente);
                         break;
                     case "2":
-                         out.println(gestionnaire.toString());
+                        out.println(gestionnaire.toString());
                         break;
                     case "3":
                         out.println(gestionnaire.toString());
