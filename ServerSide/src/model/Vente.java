@@ -10,12 +10,15 @@ public class Vente {
     private UUID idVente;
     private String libelle;
     private int prix;
+    private String encherisseur;
 
     public Vente(int prixBase, String libelle, String proprietaire) {
+        this.encherisseur = encherisseur;
         this.idVente = UUID.randomUUID();
-        this.prix = prix;
+        this.prix = prixBase;
         this.libelle = libelle;
         this.proprietaire = proprietaire;
+        this.encherisseur = null;
     }
 
     public UUID getIdVente() {
