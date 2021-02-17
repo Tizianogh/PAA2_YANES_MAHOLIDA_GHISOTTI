@@ -113,7 +113,7 @@ public class HandleServer extends Thread {
                         out.println(vente);
                         break;
                     case "2":
-                        out.println(gestionnaire.toString());
+                         out.println(gestionnaire.toString());
                         break;
                     case "3":
                         out.println(gestionnaire.toString());
