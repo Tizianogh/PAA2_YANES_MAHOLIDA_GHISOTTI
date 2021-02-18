@@ -63,6 +63,10 @@ public class Gestionnaire {
         }
     }
 
+    public synchronized void encherir() {
+
+    }
+
     public synchronized Boolean connexionUser(String pseudo) {
         if (users.contains(pseudo)) {
             return true;
