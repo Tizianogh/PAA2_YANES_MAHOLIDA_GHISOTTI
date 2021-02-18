@@ -4,38 +4,38 @@ import java.util.UUID;
 
 public class Vente {
     private String proprietaire;
-    private UUID idVente;
     private String libelle;
-    private int prix;
+    private float prix;
     private String encherisseur;
+    private int idVente;
+    private static int id = 0;
 
-    public Vente(int prixBase, String libelle, String proprietaire) {
-        this.encherisseur = encherisseur;
-        this.idVente = UUID.randomUUID();
+    public Vente(float prixBase, String libelle, String proprietaire) {
+        this.idVente = ++id;
         this.prix = prixBase;
         this.libelle = libelle;
         this.proprietaire = proprietaire;
         this.encherisseur = null;
     }
 
-    public UUID getIdVente() {
-        return idVente;
+    public int getId() {
+        return this.idVente;
     }
 
     public String getLibelle() {
         return libelle;
     }
 
-    public int getPrix() {
+    public float getPrix() {
         return prix;
     }
 
-    private void setPrix(int nouveauPrix) {
-        if (nouveauPrix > this.prix) {
-            this.prix = nouveauPrix;
-        } else {
-            System.out.println("Le prix est en dessous de la mise autorisée");
-        }
+    public void setPrix(float nouveauPrix) {
+        this.prix = nouveauPrix;
+    }
+
+    public void setEncherisseur(String pseudo) {
+        this.encherisseur = pseudo;
     }
 
     @Override

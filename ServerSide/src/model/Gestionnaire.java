@@ -2,7 +2,7 @@ package model;
 
 import server.HandleServer;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
@@ -16,7 +16,7 @@ public class Gestionnaire {
      * effectuer la vérification qu'un utilisateur est unique ou s'il
      * souhaite se connecter avec son compte déjà existant.
      */
-    ConcurrentLinkedQueue<Vente> ventes = new ConcurrentLinkedQueue<Vente>();
+    ConcurrentSkipListMap<Integer, Vente> ventes = new ConcurrentSkipListMap<>();
     ConcurrentSkipListSet<String> users = new ConcurrentSkipListSet<String>();
     ConcurrentSkipListMap<String, HandleServer> mapThreads = new ConcurrentSkipListMap<>();
 
@@ -27,7 +27,7 @@ public class Gestionnaire {
      * @return String
      */
     public synchronized String newVente(Vente vente) {
-        this.ventes.add(vente);
+        this.ventes.put(vente.getId(), vente);
         return "L'objet suivant : " + vente.getLibelle() + " a bien été mis en vente";
     }
 
@@ -36,12 +36,30 @@ public class Gestionnaire {
      *
      * @return String
      */
-    public synchronized String toString() {
+    public synchronized String lesVentes() {
         String chaine = "";
-        for (Vente v : ventes) {
+        for (Map.Entry v : ventes.entrySet()) {
             chaine = chaine + v + "\n";
         }
-        return "Liste des ventes :\nIntitulé, meilleure offre, vendeur, meilleur enchérisseur\n" + chaine;
+        return "Liste des ventes :\nId, intitulé, meilleure offre, vendeur, meilleur enchérisseur\n" + chaine;
+    }
+
+    public synchronized Boolean idVenteExistant(int id) {
+        return ventes.containsKey(id);
+    }
+
+    public synchronized float getPrix(int id) {
+        return ventes.get(id).getPrix();
+    }
+
+    public synchronized Boolean encherir(int id, float nouveauPrix, String pseudo) {
+        if (this.getPrix(id) * 1.1 > nouveauPrix) {
+            return false;
+        } else {
+            ventes.get(id).setPrix(nouveauPrix);
+            ventes.get(id).setEncherisseur(pseudo);
+            return true;
+        }
     }
 
     /**
@@ -63,10 +81,10 @@ public class Gestionnaire {
         }
     }
 
-    public synchronized void encherir() {
-
-    }
-
+    /**
+     * @param pseudo
+     * @return True if pseudo exist, false else
+     */
     public synchronized Boolean connexionUser(String pseudo) {
         if (users.contains(pseudo)) {
             return true;
@@ -75,6 +93,15 @@ public class Gestionnaire {
         }
     }
 
+    /**
+     * On récupère la thread et son pseudo attitré
+     * On stock dans ancienThread la thread qui a le même pseudo
+     * Si elle existe, on la supprime de la map et on la stop
+     * puis on stock la nouvelle thread dans la map
+     *
+     * @param pseudo
+     * @param thread
+     */
     public synchronized void newThread(String pseudo, HandleServer thread) {
         HandleServer ancienThread = mapThreads.get(pseudo);
 
@@ -84,4 +111,5 @@ public class Gestionnaire {
         }
         mapThreads.put(pseudo, thread);
     }
+
 }

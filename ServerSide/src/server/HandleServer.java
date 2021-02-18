@@ -5,7 +5,8 @@ import model.Vente;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Objects;
+import java.text.DecimalFormat;
+
 
 public class HandleServer extends Thread {
 
@@ -14,6 +15,7 @@ public class HandleServer extends Thread {
     private Socket socket;
     private Gestionnaire gestionnaire;
     private String name;
+    DecimalFormat fmt = new DecimalFormat("#,##0.00#");
 
     /**
      * Le constructeur prend en paramètre la classe gestionnaire.
@@ -76,7 +78,13 @@ public class HandleServer extends Thread {
                 msg = "Saisissez le numéro de la vente : ";
                 break;
             case "prixEnchere":
-                msg = "Saisissez le prix souhaité, il doit être égale ou supérier à ..";
+                msg = "Saisissez le prix souhaité, il doit être égale ou supérieur à ";
+                break;
+            case "prixEnchereBas":
+                msg = "Prix insuffisant, veuillez en entrer un autre supérieur à ";
+                break;
+            case "enchereReussie":
+                msg = "Enchère effectuée avec succès!";
                 break;
             default:
                 msg = "Saisie incorrecte";
@@ -98,7 +106,9 @@ public class HandleServer extends Thread {
             pseudo = in.readLine();
         } while (!gestionnaire.connexionUser(pseudo));
         //Boucle jusqu'à avoir un pseudo existant
-        this.gestionnaire.newThread(pseudo, this);
+        this.name = pseudo;
+
+        this.gestionnaire.newThread(name, this);
     }
 
     public void creationCompte() throws IOException {
@@ -149,19 +159,37 @@ public class HandleServer extends Thread {
                         out.println(this.messageClient("libelleVente"));
                         String libelle = in.readLine();
                         out.println(this.messageClient("prixBase"));
-                        int prix = Integer.parseInt(in.readLine());
-                        String vente = gestionnaire.newVente(new Vente(prix, libelle, this.getName()));
+                        float prix = Float.parseFloat(in.readLine());
+                        String vente = gestionnaire.newVente(new Vente(prix, libelle, this.name));
                         out.println(vente);
                         break;
                     case "2":
-                        out.println(gestionnaire.toString());
+                        out.println(gestionnaire.lesVentes());
                         break;
                     case "3":
-                        out.println(gestionnaire.toString());
-                        out.println(this.messageClient("idVenteEnchere"));
-                        String id = in.readLine();
-                        out.println(this.messageClient("prixEnchere"));
-                        String nouveauPrix = in.readLine();
+                        out.println(gestionnaire.lesVentes());
+                        Boolean error = false;
+                        int id;
+                        do { // lecture d'un id correct
+                            if (error) out.println(this.messageClient("error"));
+                            out.println(this.messageClient("idVenteEnchere"));
+                            id = Integer.parseInt(in.readLine());
+                            error = true;
+                        } while (!gestionnaire.idVenteExistant(id));
+
+                        float nouveauPrix;
+                        Boolean first = true;
+                        do {
+                            if (first) {
+                                out.println(this.messageClient("prixEnchere") + fmt.format(gestionnaire.getPrix(id) * 1.1));
+                                first = false;
+                            } else
+                                out.println(this.messageClient("prixEnchereBas") + fmt.format(gestionnaire.getPrix(id) * 1.1));
+
+                            nouveauPrix = Float.parseFloat(in.readLine());
+
+                        } while (!gestionnaire.encherir(id, nouveauPrix, this.name));
+                        out.println(this.messageClient("enchereReussie"));
                         break;
                     case "5":
                         out.println(this.messageClient("menu"));
