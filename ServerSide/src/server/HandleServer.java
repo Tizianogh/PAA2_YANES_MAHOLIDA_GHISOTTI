@@ -77,6 +77,12 @@ public class HandleServer extends Thread {
             case "idVenteEnchere":
                 msg = "Saisissez le numéro de la vente : ";
                 break;
+            case "idVenteInexistant":
+                msg = "Numéro vente incorrect.";
+                break;
+            case "prorpietaireEgaleEnrechiseur":
+                msg = "Erreur : vous êtes le détenteur de cette vente, il vous est impossible d'enchérir.";
+                break;
             case "prixEnchere":
                 msg = "Saisissez le prix souhaité, il doit être égale ou supérieur à ";
                 break;
@@ -129,6 +135,34 @@ public class HandleServer extends Thread {
         this.gestionnaire.newThread(name, this);
     }
 
+    public void enchere() throws IOException {
+        out.println(gestionnaire.lesVentes());
+        int reponse = 2;
+        int id;
+        do { // lecture d'un id vente correct
+            if (reponse == 0) out.println(this.messageClient("idVenteInexistant"));
+            else if (reponse == 1) out.println(this.messageClient("prorpietaireEgaleEnrechiseur"));
+
+            out.println(this.messageClient("idVenteEnchere"));
+            id = Integer.parseInt(in.readLine());
+            reponse = gestionnaire.idVenteCorrect(id, this.name);
+        } while (reponse != 2);
+
+        float nouveauPrix;
+        Boolean first = true;
+        do { // lecture d'un prix suffisant
+            if (first) {
+                out.println(this.messageClient("prixEnchere") + fmt.format(gestionnaire.getPrix(id) * 1.1));
+                first = false;
+            } else
+                out.println(this.messageClient("prixEnchereBas") + fmt.format(gestionnaire.getPrix(id) * 1.1));
+            nouveauPrix = Float.parseFloat(in.readLine());
+
+        } while (!gestionnaire.encherir(id, nouveauPrix, this.name));//màj du prix
+
+        out.println(this.messageClient("enchereReussie"));
+    }
+
     /**
      * Methode run de notre thread.
      * C'est ici que nous gérons tous les cas d'utilisations
@@ -167,29 +201,7 @@ public class HandleServer extends Thread {
                         out.println(gestionnaire.lesVentes());
                         break;
                     case "3":
-                        out.println(gestionnaire.lesVentes());
-                        Boolean error = false;
-                        int id;
-                        do { // lecture d'un id correct
-                            if (error) out.println(this.messageClient("error"));
-                            out.println(this.messageClient("idVenteEnchere"));
-                            id = Integer.parseInt(in.readLine());
-                            error = true;
-                        } while (!gestionnaire.idVenteExistant(id));
-
-                        float nouveauPrix;
-                        Boolean first = true;
-                        do {
-                            if (first) {
-                                out.println(this.messageClient("prixEnchere") + fmt.format(gestionnaire.getPrix(id) * 1.1));
-                                first = false;
-                            } else
-                                out.println(this.messageClient("prixEnchereBas") + fmt.format(gestionnaire.getPrix(id) * 1.1));
-
-                            nouveauPrix = Float.parseFloat(in.readLine());
-
-                        } while (!gestionnaire.encherir(id, nouveauPrix, this.name));
-                        out.println(this.messageClient("enchereReussie"));
+                        this.enchere();
                         break;
                     case "5":
                         out.println(this.messageClient("menu"));

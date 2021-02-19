@@ -52,6 +52,25 @@ public class Gestionnaire {
         return ventes.get(id).getPrix();
     }
 
+    /**
+     * @param id     = id de la vente en question
+     * @param pseudo = le pseudo de la thread en cours, càd celui de l'enchérisseur
+     * @return 0 if id inexistant,  1 if proprietaire = encherisseur, 2 else (idVente correct)
+     */
+    public synchronized int idVenteCorrect(int id, String pseudo) {
+        if (!ventes.containsKey(id)) return 0;
+        else if (pseudo.equals(ventes.get(id).getProprietaire())) return 1;
+        else return 2;
+    }
+
+    /**
+     * Met à jour le prix si le prix est suffisant
+     *
+     * @param id
+     * @param nouveauPrix
+     * @param pseudo
+     * @return true if prix suffisant, false else
+     */
     public synchronized Boolean encherir(int id, float nouveauPrix, String pseudo) {
         if (this.getPrix(id) * 1.1 > nouveauPrix) {
             return false;
@@ -111,5 +130,4 @@ public class Gestionnaire {
         }
         mapThreads.put(pseudo, thread);
     }
-
 }

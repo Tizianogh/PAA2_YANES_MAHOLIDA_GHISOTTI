@@ -38,6 +38,10 @@ public class Vente {
         this.encherisseur = pseudo;
     }
 
+    public String getProprietaire() {
+        return this.proprietaire;
+    }
+
     @Override
     public String toString() {
         String inter = "/";
