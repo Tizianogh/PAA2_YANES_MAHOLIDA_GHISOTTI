@@ -3,6 +3,8 @@ package model;
 import server.HandleServer;
 
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
@@ -19,16 +21,21 @@ public class Gestionnaire {
     ConcurrentSkipListMap<Integer, Vente> ventes = new ConcurrentSkipListMap<>();
     ConcurrentSkipListSet<String> users = new ConcurrentSkipListSet<String>();
     ConcurrentSkipListMap<String, HandleServer> mapThreads = new ConcurrentSkipListMap<>();
+    Timer timer = new Timer();
 
     /**
-     * Cette méthode sert à rajouter une vente dans la liste synchronisé "ventes"
+     * Cette méthode sert à rajouter une vente dans la liste synchronisée "ventes"
      *
-     * @param vente
-     * @return String
+     * @param prix
+     * @param libelle
+     * @param pseudo
+     * @return
      */
-    public synchronized String newVente(Vente vente) {
+    public synchronized String newVente(float prix, String libelle, String pseudo) {
+        Vente vente = new Vente(prix, libelle, pseudo);
+        timer.schedule(new VenteASupprimer(vente.getId()), 20000);
         this.ventes.put(vente.getId(), vente);
-        return "L'objet suivant : " + vente.getLibelle() + " a bien été mis en vente";
+        return "La vente suivante : " + vente.getLibelle() + ", a bien été mise en vente";
     }
 
     /**
@@ -129,5 +136,18 @@ public class Gestionnaire {
             ancienThread.stop();
         }
         mapThreads.put(pseudo, thread);
+    }
+
+    public class VenteASupprimer extends TimerTask {
+        private int idVente;
+
+        VenteASupprimer(int idVente) {
+            this.idVente = idVente;
+        }
+
+        @Override
+        public void run() {
+            ventes.remove(idVente);
+        }
     }
 }

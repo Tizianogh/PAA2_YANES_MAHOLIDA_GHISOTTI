@@ -194,7 +194,7 @@ public class HandleServer extends Thread {
                         String libelle = in.readLine();
                         out.println(this.messageClient("prixBase"));
                         float prix = Float.parseFloat(in.readLine());
-                        String vente = gestionnaire.newVente(new Vente(prix, libelle, this.name));
+                        String vente = gestionnaire.newVente(prix, libelle, this.name);
                         out.println(vente);
                         break;
                     case "2":
