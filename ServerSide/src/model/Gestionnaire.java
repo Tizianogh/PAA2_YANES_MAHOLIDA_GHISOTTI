@@ -19,6 +19,7 @@ public class Gestionnaire {
      * souhaite se connecter avec son compte déjà existant.
      */
     ConcurrentSkipListMap<Integer, Vente> ventes = new ConcurrentSkipListMap<>();
+    ConcurrentSkipListMap<Integer, Vente> historique = new ConcurrentSkipListMap<>();
     ConcurrentSkipListSet<String> users = new ConcurrentSkipListSet<String>();
     ConcurrentSkipListMap<String, HandleServer> mapThreads = new ConcurrentSkipListMap<>();
     Timer timer = new Timer();
@@ -33,7 +34,7 @@ public class Gestionnaire {
      */
     public synchronized String newVente(float prix, String libelle, String pseudo) {
         Vente vente = new Vente(prix, libelle, pseudo);
-        timer.schedule(new VenteASupprimer(vente.getId()), 20000);
+        timer.schedule(new VenteASupprimer(vente), 10000);
         this.ventes.put(vente.getId(), vente);
         return "La vente suivante : " + vente.getLibelle() + ", a bien été mise en vente";
     }
@@ -49,6 +50,14 @@ public class Gestionnaire {
             chaine = chaine + v + "\n";
         }
         return "Liste des ventes :\nId, intitulé, meilleure offre, vendeur, meilleur enchérisseur\n" + chaine;
+    }
+
+    public synchronized String historique() {
+        String chaine = "";
+        for (Map.Entry v : historique.entrySet()) {
+            chaine = chaine + v + "\n";
+        }
+        return "Historique des ventes :\nId, intitulé, meilleure offre, vendeur, meilleur enchérisseur\n" + chaine;
     }
 
     public synchronized Boolean idVenteExistant(int id) {
@@ -139,15 +148,19 @@ public class Gestionnaire {
     }
 
     public class VenteASupprimer extends TimerTask {
-        private int idVente;
+        private Vente vente;
 
-        VenteASupprimer(int idVente) {
-            this.idVente = idVente;
+        VenteASupprimer(Vente vente) {
+            this.vente = vente;
         }
 
         @Override
         public void run() {
-            ventes.remove(idVente);
+            if (!vente.getEncherisseur().isEmpty()) {
+                System.out.println(vente.getEncherisseur());
+                historique.put(vente.getId(), vente);
+            }
+            ventes.remove(vente.getId());
         }
     }
 }

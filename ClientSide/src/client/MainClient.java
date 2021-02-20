@@ -23,6 +23,7 @@ public class MainClient extends Thread {
         out.println(pseudo);
 
         while (true) {
+            //lecture de toutes les lignes du msg serveur
             do {
                 System.out.println(fromServer.readLine());
             } while (fromServer.ready());
@@ -30,9 +31,7 @@ public class MainClient extends Thread {
             System.out.println("> ");
             String command = keyboard.readLine();
 
-            if (command.equals("quit")) {
-                break;
-            }
+            if (command.equals("6")) break;
             out.println(command);
         }
         socket.close();

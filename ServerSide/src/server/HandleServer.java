@@ -34,7 +34,7 @@ public class HandleServer extends Thread {
     }
 
     /**
-     * Méthode qui gère tous les messages qu'un client peut recevoir au
+     * Méthode qui gère tous les messages que peut recevoir le serveur au
      * travers des différentes étapes.
      *
      * @param param
@@ -135,6 +135,15 @@ public class HandleServer extends Thread {
         this.gestionnaire.newThread(name, this);
     }
 
+    public void creationVente() throws IOException {
+        out.println(this.messageClient("libelleVente"));
+        String libelle = in.readLine();
+        out.println(this.messageClient("prixBase"));
+        float prix = Float.parseFloat(in.readLine());
+        String vente = gestionnaire.newVente(prix, libelle, this.name);
+        out.println(vente);
+    }
+
     public void enchere() throws IOException {
         out.println(gestionnaire.lesVentes());
         int reponse = 2;
@@ -183,25 +192,22 @@ public class HandleServer extends Thread {
                     out.println(this.messageClient("error"));
                 }
             }
-
             out.println(this.messageClient("menu"));
+
             while (true) {
                 String command = in.readLine();
-
                 switch (command) {
                     case "1":
-                        out.println(this.messageClient("libelleVente"));
-                        String libelle = in.readLine();
-                        out.println(this.messageClient("prixBase"));
-                        float prix = Float.parseFloat(in.readLine());
-                        String vente = gestionnaire.newVente(prix, libelle, this.name);
-                        out.println(vente);
+                        this.creationVente();
                         break;
                     case "2":
                         out.println(gestionnaire.lesVentes());
                         break;
                     case "3":
                         this.enchere();
+                        break;
+                    case "4":
+                        out.println(gestionnaire.historique());
                         break;
                     case "5":
                         out.println(this.messageClient("menu"));

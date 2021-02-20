@@ -1,13 +1,12 @@
 package model;
 
-import java.util.UUID;
 
 public class Vente {
-    private String proprietaire;
+    private int idVente;
     private String libelle;
     private float prix;
+    private String proprietaire;
     private String encherisseur;
-    private int idVente;
     private static int id = 0;
 
     public Vente(float prixBase, String libelle, String proprietaire) {
@@ -15,7 +14,6 @@ public class Vente {
         this.prix = prixBase;
         this.libelle = libelle;
         this.proprietaire = proprietaire;
-        this.encherisseur = null;
     }
 
     public int getId() {
@@ -30,6 +28,14 @@ public class Vente {
         return prix;
     }
 
+    public String getProprietaire() {
+        return this.proprietaire;
+    }
+
+    public String getEncherisseur() {
+        return this.encherisseur;
+    }
+
     public void setPrix(float nouveauPrix) {
         this.prix = nouveauPrix;
     }
@@ -38,14 +44,19 @@ public class Vente {
         this.encherisseur = pseudo;
     }
 
-    public String getProprietaire() {
-        return this.proprietaire;
-    }
-
     @Override
     public String toString() {
         String inter = "/";
         if (encherisseur != null) inter = encherisseur;
         return libelle + ", " + prix + ", " + proprietaire + ", " + inter;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Vente)) return false;
+        Vente vente = (Vente) o;
+        return idVente == vente.idVente;
+    }
+
 }
