@@ -14,7 +14,7 @@ public class HandleServer extends Thread {
     public PrintWriter out; //*
     private Socket socket;
     private Gestionnaire gestionnaire;
-    private String name;
+    private String name; //user
     DecimalFormat fmt = new DecimalFormat("#,##0.00#");
 
     /**
@@ -128,7 +128,7 @@ public class HandleServer extends Thread {
                 out.println(this.messageClient("pseudoExistant"));
             }
             pseudo = in.readLine();
-        } while (!gestionnaire.newUser(pseudo)); //Boucle jusqu'à avoir un pseudo inexistant
+        } while (!gestionnaire.newUser(pseudo, this.socket.getInetAddress())); //Boucle jusqu'à avoir un pseudo inexistant
 
         this.name = pseudo;
 
