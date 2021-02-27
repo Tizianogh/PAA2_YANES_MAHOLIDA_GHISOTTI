@@ -1,16 +1,26 @@
 package model;
 
-import java.net.Inet4Address;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 
 public class User {
 
     private InetAddress adressIP;
     private String pseudo;
+    private PrintWriter out;
 
-    public User(InetAddress adressIP, String pseudo) {
+    public void setOut(PrintWriter out) {
+        this.out = out;
+    }
+
+    public PrintWriter getOut() {
+        return out;
+    }
+
+    public User(InetAddress adressIP, String pseudo, PrintWriter out) {
         this.adressIP = adressIP;
         this.pseudo = pseudo;
+        this.out=out;
     }
 
     public InetAddress getAdressIP() {

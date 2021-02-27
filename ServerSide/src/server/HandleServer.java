@@ -1,7 +1,6 @@
 package server;
 
 import model.Gestionnaire;
-import model.Vente;
 
 import java.io.*;
 import java.net.Socket;
@@ -110,7 +109,7 @@ public class HandleServer extends Thread {
                 out.println(this.messageClient("pseudoInexistant"));
             }
             pseudo = in.readLine();
-        } while (!gestionnaire.connexionUser(pseudo));
+        } while (!gestionnaire.connexionUser(pseudo, out));
         //Boucle jusqu'à avoir un pseudo existant
         this.name = pseudo;
 
@@ -128,7 +127,7 @@ public class HandleServer extends Thread {
                 out.println(this.messageClient("pseudoExistant"));
             }
             pseudo = in.readLine();
-        } while (!gestionnaire.newUser(pseudo, this.socket.getInetAddress())); //Boucle jusqu'à avoir un pseudo inexistant
+        } while (!gestionnaire.newUser(pseudo, this.socket.getInetAddress(), out)); //Boucle jusqu'à avoir un pseudo inexistant
 
         this.name = pseudo;
 

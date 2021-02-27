@@ -2,7 +2,7 @@ package model;
 
 import server.HandleServer;
 
-import java.net.Inet4Address;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.util.Map;
 import java.util.Timer;
@@ -39,7 +39,7 @@ public class Gestionnaire {
      */
     public synchronized String newVente(float prix, String libelle, String pseudo) {
         Vente vente = new Vente(prix, libelle, this.getUser(pseudo));
-        timer.schedule(new VenteASupprimer(vente), 30000);
+        timer.schedule(new VenteASupprimer(vente), 50000);
         this.ventes.put(vente.getId(), vente);
         return "La vente suivante : " + vente.getLibelle() + ", a bien été mise en vente";
     }
@@ -59,9 +59,9 @@ public class Gestionnaire {
 
     public synchronized String historique() {
 
-        String chaine="";
+        String chaine = "";
         for (Map.Entry<Integer, Vente> pair : historique.entrySet()) {
-            chaine = chaine + pair.getValue().toStringHistorique()+ "\n";
+            chaine = chaine + pair.getValue().toStringHistorique() + "\n";
         }
 
         /* for (Map.Entry v : historique.entrySet()) {
@@ -127,11 +127,11 @@ public class Gestionnaire {
      * @param pseudo
      * @return Boolean
      */
-    public synchronized Boolean newUser(String pseudo, InetAddress adressIP) {
+    public synchronized Boolean newUser(String pseudo, InetAddress adressIP, PrintWriter out) {
         if (users.containsKey(pseudo)) {
             return false;
         } else {
-            User u = new User(adressIP, pseudo);
+            User u = new User(adressIP, pseudo, out);
             users.put(pseudo, u);
             return true;
         }
@@ -141,8 +141,9 @@ public class Gestionnaire {
      * @param pseudo
      * @return True if pseudo exist, false else
      */
-    public synchronized Boolean connexionUser(String pseudo) {
+    public synchronized Boolean connexionUser(String pseudo, PrintWriter out) {
         if (users.containsKey(pseudo)) {
+            users.get(pseudo).setOut(out);
             return true;
         } else {
             return false;
@@ -172,7 +173,6 @@ public class Gestionnaire {
         private Vente vente;
 
         VenteASupprimer(Vente vente) {
-
             this.vente = vente;
         }
 
@@ -180,10 +180,11 @@ public class Gestionnaire {
         public void run() {
             if (vente.getEncherisseur() != null) {
                 historique.put(vente.getId(), vente);
-                mapThreads.get(vente.getProprietaire().getPseudo()).out.println("Votre vente de [" + vente.getLibelle() + "] a été remportée par [" + vente.getEncherisseur().getPseudo() + "] à [" + vente.getPrix() + "].");
-                mapThreads.get(vente.getEncherisseur().getPseudo()).out.println("Félicitations ! vous rempotrer la vente de [" + vente.getLibelle() + "] à [" + vente.getPrix() + "].");
+                vente.getProprietaire().getOut().println("Votre vente de [" + vente.getLibelle() + "] a été remportée par [" + vente.getEncherisseur().getPseudo() + "] à [" + vente.getPrix() + "].");
+                vente.getEncherisseur().getOut().println("Félicitations ! vous rempotrer la vente de [" + vente.getLibelle() + "] à [" + vente.getPrix() + "].");
             } else {
-                mapThreads.get(vente.getProprietaire().getPseudo()).out.println("Votre vente de [" + vente.getLibelle() + "] est terminée sans avoir trouvé preneur."); //*
+                PrintWriter out = vente.getProprietaire().getOut();
+                out.println("Votre vente de [" + vente.getLibelle() + "] est terminée sans avoir trouvé preneur."); //*
             }
             ventes.remove(vente.getId());
         }

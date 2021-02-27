@@ -24,7 +24,7 @@ public class MainServer {
 
             server.start();
 
-            Scanner sc = new Scanner(System.in);
+           /* Scanner sc = new Scanner(System.in);
             System.out.println("Saisissez 1 pour voir les ventes en cours, 2 pour l'historique des ventes : ");
             if (sc.hasNextInt()) {
                 int choix = sc.nextInt();
@@ -37,7 +37,7 @@ public class MainServer {
                 }
             } else{
                 System.out.println("Saisie incorrecte");
-            }
+            } */
         }
     }
 }
