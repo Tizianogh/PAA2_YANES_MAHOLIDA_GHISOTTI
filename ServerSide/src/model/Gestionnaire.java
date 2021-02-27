@@ -25,6 +25,7 @@ public class Gestionnaire {
     Timer timer = new Timer();
 
     /**
+     *
      * Cette méthode sert à rajouter une vente dans la liste synchronisée "ventes"
      *
      * @param prix
@@ -34,7 +35,7 @@ public class Gestionnaire {
      */
     public synchronized String newVente(float prix, String libelle, String pseudo) {
         Vente vente = new Vente(prix, libelle, pseudo);
-        timer.schedule(new VenteASupprimer(vente), 10000);
+        timer.schedule(new VenteASupprimer(vente), 30000);
         this.ventes.put(vente.getId(), vente);
         return "La vente suivante : " + vente.getLibelle() + ", a bien été mise en vente";
     }
@@ -51,25 +52,27 @@ public class Gestionnaire {
         }
         return "Liste des ventes :\nId, intitulé, meilleure offre, vendeur, meilleur enchérisseur\n" + chaine;
     }
-
     public synchronized String historique() {
         String chaine = "";
-        for (Map.Entry v : historique.entrySet()) {
+        for (Map.Entry v : historique.entrySet()){
             chaine = chaine + v + "\n";
         }
         return "Historique des ventes :\nId, intitulé, meilleure offre, vendeur, meilleur enchérisseur\n" + chaine;
     }
 
     public synchronized Boolean idVenteExistant(int id) {
+
         return ventes.containsKey(id);
     }
 
     public synchronized float getPrix(int id) {
+
         return ventes.get(id).getPrix();
     }
 
     /**
-     * @param id     = id de la vente en question
+     *
+     *  @param id     = id de la vente en question
      * @param pseudo = le pseudo de la thread en cours, càd celui de l'enchérisseur
      * @return 0 if id inexistant,  1 if proprietaire = encherisseur, 2 else (idVente correct)
      */
@@ -80,6 +83,7 @@ public class Gestionnaire {
     }
 
     /**
+     *
      * Met à jour le prix si le prix est suffisant
      *
      * @param id
@@ -91,13 +95,21 @@ public class Gestionnaire {
         if (this.getPrix(id) * 1.1 > nouveauPrix) {
             return false;
         } else {
-            ventes.get(id).setPrix(nouveauPrix);
-            ventes.get(id).setEncherisseur(pseudo);
+            Vente v = ventes.get(id);
+            if (!v.getEncherisseur().isEmpty())
+                mapThreads.get(v.getEncherisseur()).out.println(
+                        "["+pseudo+
+                                "] vient d'enchérir ["+nouveauPrix+
+                                "] sur la vente de ["+v.getLibelle()+"]."
+                );
+            v.setPrix(nouveauPrix);
+            v.setEncherisseur(pseudo);
             return true;
         }
     }
 
     /**
+     *
      * Méthode permettant de vérifier que le pseudo entré par
      * l'utilisateur n'est pas déjà utilisé. Si ce n'est pas le cas,
      * alors on autorise son utilisation et on l'ajoute à liste
@@ -117,6 +129,7 @@ public class Gestionnaire {
     }
 
     /**
+     *
      * @param pseudo
      * @return True if pseudo exist, false else
      */
@@ -129,6 +142,7 @@ public class Gestionnaire {
     }
 
     /**
+     *
      * On récupère la thread et son pseudo attitré
      * On stock dans ancienThread la thread qui a le même pseudo
      * Si elle existe, on la supprime de la map et on la stop
@@ -148,17 +162,21 @@ public class Gestionnaire {
     }
 
     public class VenteASupprimer extends TimerTask {
-        private Vente vente;
-
+        private Vente  vente;
         VenteASupprimer(Vente vente) {
+
             this.vente = vente;
         }
 
         @Override
         public void run() {
-            if (!vente.getEncherisseur().isEmpty()) {
+            if ( ! vente.getEncherisseur().isEmpty()) {
                 System.out.println(vente.getEncherisseur());
-                historique.put(vente.getId(), vente);
+                historique.put(vente.getId(),vente);
+                mapThreads.get(vente.getProprietaire()).out.println("Votre vente de ["+vente.getLibelle()+"] a été remportée par ["+vente.getEncherisseur()+"] à ["+vente.getPrix()+"].");
+                mapThreads.get(vente.getEncherisseur()).out.println("Félicitations ! vous rempotrer la vente de ["+vente.getLibelle()+"] à ["+vente.getPrix()+"].");
+            } else {
+                mapThreads.get(vente.getProprietaire()).out.println("Votre vente de ["+vente.getLibelle()+"] est terminée sans avoir trouvé preneur."); //*
             }
             ventes.remove(vente.getId());
         }

@@ -14,6 +14,7 @@ public class Vente {
         this.prix = prixBase;
         this.libelle = libelle;
         this.proprietaire = proprietaire;
+        this.encherisseur = "";
     }
 
     public int getId() {

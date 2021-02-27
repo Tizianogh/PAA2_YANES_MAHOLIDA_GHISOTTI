@@ -11,7 +11,7 @@ import java.text.DecimalFormat;
 public class HandleServer extends Thread {
 
     private BufferedReader in;
-    private PrintWriter out;
+    public PrintWriter out; //*
     private Socket socket;
     private Gestionnaire gestionnaire;
     private String name;
