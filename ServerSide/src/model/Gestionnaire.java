@@ -4,9 +4,7 @@ import server.HandleServer;
 
 import java.io.PrintWriter;
 import java.net.InetAddress;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public class Gestionnaire {
@@ -23,6 +21,8 @@ public class Gestionnaire {
     ConcurrentSkipListMap<Integer, Vente> historique = new ConcurrentSkipListMap<>();
     ConcurrentSkipListMap<String, User> users = new ConcurrentSkipListMap<>();
     ConcurrentSkipListMap<String, HandleServer> mapThreads = new ConcurrentSkipListMap<>();
+    ConcurrentSkipListMap<String, ArrayList<String>> messageEnAttente = new ConcurrentSkipListMap<>();
+
     Timer timer = new Timer();
 
     public synchronized User getUser(String pseudo) {
@@ -39,7 +39,7 @@ public class Gestionnaire {
      */
     public synchronized String newVente(float prix, String libelle, String pseudo) {
         Vente vente = new Vente(prix, libelle, this.getUser(pseudo));
-        timer.schedule(new VenteASupprimer(vente), 50000);
+        timer.schedule(new VenteASupprimer(vente), 30000);
         this.ventes.put(vente.getId(), vente);
         return "La vente suivante : " + vente.getLibelle() + ", a bien été mise en vente";
     }
@@ -144,9 +144,40 @@ public class Gestionnaire {
     public synchronized Boolean connexionUser(String pseudo, PrintWriter out) {
         if (users.containsKey(pseudo)) {
             users.get(pseudo).setOut(out);
+            ArrayList<String> l = this.messageEnAttente.get(pseudo);
+            if (l != null) {
+                for (String message : l) out.println(message);
+            }
             return true;
         } else {
             return false;
+        }
+    }
+
+    public synchronized void removeThread(String pseudo) {
+        mapThreads.remove(pseudo);
+    }
+
+    /**
+     * Modifier les notifications
+     * Mettre à jour connexion(Verifier s'il y a un message en attente ou pas)
+     *
+     * @param u
+     * @param m
+     */
+    public synchronized void message(User u, String m) {
+        if (mapThreads.get(u.getPseudo()) != null) {
+            u.getOut().println(m);
+        } else {
+            ArrayList<String> l = messageEnAttente.get(u.getPseudo());
+
+            if (l != null) {
+                l.add(m);
+            } else {
+                l = new ArrayList<String>();
+                l.add(m);
+                messageEnAttente.put(u.getPseudo(), l);
+            }
         }
     }
 
@@ -180,11 +211,10 @@ public class Gestionnaire {
         public void run() {
             if (vente.getEncherisseur() != null) {
                 historique.put(vente.getId(), vente);
-                vente.getProprietaire().getOut().println("Votre vente de [" + vente.getLibelle() + "] a été remportée par [" + vente.getEncherisseur().getPseudo() + "] à [" + vente.getPrix() + "].");
-                vente.getEncherisseur().getOut().println("Félicitations ! vous rempotrer la vente de [" + vente.getLibelle() + "] à [" + vente.getPrix() + "].");
+                message(vente.getProprietaire(), "Votre vente de [" + vente.getLibelle() + "] a été remportée par [" + vente.getEncherisseur().getPseudo() + "] à [" + vente.getPrix() + "].");
+                message(vente.getEncherisseur(), "Félicitations ! vous rempotrer la vente de [" + vente.getLibelle() + "] à [" + vente.getPrix() + "].");
             } else {
-                PrintWriter out = vente.getProprietaire().getOut();
-                out.println("Votre vente de [" + vente.getLibelle() + "] est terminée sans avoir trouvé preneur."); //*
+                message(vente.getProprietaire(), "Votre vente de [" + vente.getLibelle() + "] est terminée sans avoir trouvé preneur.");
             }
             ventes.remove(vente.getId());
         }

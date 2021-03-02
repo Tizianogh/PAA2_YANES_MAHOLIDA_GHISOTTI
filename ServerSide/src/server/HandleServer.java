@@ -91,6 +91,9 @@ public class HandleServer extends Thread {
             case "enchereReussie":
                 msg = "Enchère effectuée avec succès!";
                 break;
+            case "deconnexion":
+                msg = "Vous vous êtes déconnecté. Vous pouvez quitter l'application.";
+                break;
             default:
                 msg = "Saisie incorrecte";
                 break;
@@ -210,6 +213,11 @@ public class HandleServer extends Thread {
                         break;
                     case "5":
                         out.println(this.messageClient("menu"));
+                        break;
+                    case "6":
+                        out.println(this.messageClient("deconnexion"));
+                        gestionnaire.removeThread(this.name);
+                        this.socket.close();
                         break;
                     default:
                         out.println(this.messageClient("error"));

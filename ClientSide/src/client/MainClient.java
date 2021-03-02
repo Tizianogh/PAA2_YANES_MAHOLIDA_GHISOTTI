@@ -31,9 +31,7 @@ public class MainClient extends Thread {
             System.out.println("> ");
             String command = keyboard.readLine();
 
-            if (command.equals("6")) break;
             out.println(command);
         }
-        socket.close();
     }
 }
