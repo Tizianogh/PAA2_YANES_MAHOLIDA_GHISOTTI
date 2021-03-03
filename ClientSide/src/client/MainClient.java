@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-public class MainClient extends Thread {
+public class MainClient {
     private static final int SERVER_PORT = 9000;
     private static final String SERVER_IP = "127.0.0.1";
 
@@ -17,21 +17,45 @@ public class MainClient extends Thread {
         PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
         BufferedReader fromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
+
         System.out.println(fromServer.readLine());
-        System.out.println("> ");
+        System.out.print("> ");
         String pseudo = keyboard.readLine();
         out.println(pseudo);
 
-        while (true) {
-            //lecture de toutes les lignes du msg serveur
-            do {
-                System.out.println(fromServer.readLine());
-            } while (fromServer.ready());
+        Thread sendToServer = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    String command = null;
+                    try {
+                        command = keyboard.readLine();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
 
-            System.out.println("> ");
-            String command = keyboard.readLine();
+                    out.println(command);
+                }
+            }
+        });
+        sendToServer.start();
 
-            out.println(command);
-        }
+        Thread receiveFromServer = new Thread(new Runnable() {
+            String msg;
+
+            @Override
+            public void run() {
+                try {
+                    msg = fromServer.readLine();
+                    while (msg != null) {
+                        System.out.println(msg);
+                        msg = fromServer.readLine();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        receiveFromServer.start();
     }
 }

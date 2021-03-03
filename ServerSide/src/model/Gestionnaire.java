@@ -21,7 +21,7 @@ public class Gestionnaire {
     ConcurrentSkipListMap<Integer, Vente> historique = new ConcurrentSkipListMap<>();
     ConcurrentSkipListMap<String, User> users = new ConcurrentSkipListMap<>();
     ConcurrentSkipListMap<String, HandleServer> mapThreads = new ConcurrentSkipListMap<>();
-    ConcurrentSkipListMap<String, ArrayList<String>> messageEnAttente = new ConcurrentSkipListMap<>();
+    ConcurrentSkipListMap<String, ArrayList<String>> messagesEnAttente = new ConcurrentSkipListMap<>();
 
     Timer timer = new Timer();
 
@@ -41,6 +41,9 @@ public class Gestionnaire {
         Vente vente = new Vente(prix, libelle, this.getUser(pseudo));
         timer.schedule(new VenteASupprimer(vente), 30000);
         this.ventes.put(vente.getId(), vente);
+        for (Map.Entry<String, HandleServer> t : mapThreads.entrySet()) {
+            if(t.getKey()!=pseudo) t.getValue().out.println("⚠ ["+pseudo+"] a ajouté une nouvelle vente : ["+libelle+"] à ["+prix+"].");
+        }
         return "La vente suivante : " + vente.getLibelle() + ", a bien été mise en vente";
     }
 
@@ -63,10 +66,6 @@ public class Gestionnaire {
         for (Map.Entry<Integer, Vente> pair : historique.entrySet()) {
             chaine = chaine + pair.getValue().toStringHistorique() + "\n";
         }
-
-        /* for (Map.Entry v : historique.entrySet()) {
-
-        }*/
 
         return "Historique des ventes :\nId, intitulé, meilleure offre, vendeur, adresse IP -vendeur-, meilleur enchérisseur, adresse ip -enchérisseur-\n" + chaine;
     }
@@ -107,7 +106,7 @@ public class Gestionnaire {
             Vente v = ventes.get(id);
             if (v.getEncherisseur() != null)
                 mapThreads.get(v.getEncherisseur().getPseudo()).out.println(
-                        "[" + pseudo +
+                        "⚠ [" + pseudo +
                                 "] vient d'enchérir [" + nouveauPrix +
                                 "] sur la vente de [" + v.getLibelle() + "]."
                 );
@@ -144,7 +143,7 @@ public class Gestionnaire {
     public synchronized Boolean connexionUser(String pseudo, PrintWriter out) {
         if (users.containsKey(pseudo)) {
             users.get(pseudo).setOut(out);
-            ArrayList<String> l = this.messageEnAttente.get(pseudo);
+            ArrayList<String> l = this.messagesEnAttente.get(pseudo);
             if (l != null) {
                 for (String message : l) out.println(message);
             }
@@ -169,14 +168,14 @@ public class Gestionnaire {
         if (mapThreads.get(u.getPseudo()) != null) {
             u.getOut().println(m);
         } else {
-            ArrayList<String> l = messageEnAttente.get(u.getPseudo());
+            ArrayList<String> l = messagesEnAttente.get(u.getPseudo());
 
             if (l != null) {
                 l.add(m);
             } else {
                 l = new ArrayList<String>();
                 l.add(m);
-                messageEnAttente.put(u.getPseudo(), l);
+                messagesEnAttente.put(u.getPseudo(), l);
             }
         }
     }
@@ -211,10 +210,10 @@ public class Gestionnaire {
         public void run() {
             if (vente.getEncherisseur() != null) {
                 historique.put(vente.getId(), vente);
-                message(vente.getProprietaire(), "Votre vente de [" + vente.getLibelle() + "] a été remportée par [" + vente.getEncherisseur().getPseudo() + "] à [" + vente.getPrix() + "].");
-                message(vente.getEncherisseur(), "Félicitations ! vous rempotrer la vente de [" + vente.getLibelle() + "] à [" + vente.getPrix() + "].");
+                message(vente.getProprietaire(), "⚠ Votre vente de [" + vente.getLibelle() + "] a été remportée par [" + vente.getEncherisseur().getPseudo() + "] à [" + vente.getPrix() + "].");
+                message(vente.getEncherisseur(), "⚠ Félicitations ! vous rempotrer la vente de [" + vente.getLibelle() + "] à [" + vente.getPrix() + "].");
             } else {
-                message(vente.getProprietaire(), "Votre vente de [" + vente.getLibelle() + "] est terminée sans avoir trouvé preneur.");
+                message(vente.getProprietaire(), "⚠ Votre vente de [" + vente.getLibelle() + "] est terminée sans avoir trouvé preneur.");
             }
             ventes.remove(vente.getId());
         }
