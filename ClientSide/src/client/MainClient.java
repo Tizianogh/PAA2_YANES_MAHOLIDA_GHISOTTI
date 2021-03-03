@@ -19,7 +19,6 @@ public class MainClient {
 
 
         System.out.println(fromServer.readLine());
-        System.out.print("> ");
         String pseudo = keyboard.readLine();
         out.println(pseudo);
 
@@ -33,7 +32,6 @@ public class MainClient {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-
                     out.println(command);
                 }
             }
@@ -47,10 +45,13 @@ public class MainClient {
             public void run() {
                 try {
                     msg = fromServer.readLine();
+
                     while (msg != null) {
                         System.out.println(msg);
+
                         msg = fromServer.readLine();
                     }
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

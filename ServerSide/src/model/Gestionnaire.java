@@ -8,6 +8,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public class Gestionnaire {
+    private static final int TEMPS_VENTE = 120000;
+    private static final double SEUIL_MIN = 0.1; //Seuil minimum entre la nouvelle enchère et la dernière
 
     /**
      * La liste "ventes" s'occupent de stocker et synchronisé
@@ -39,10 +41,11 @@ public class Gestionnaire {
      */
     public synchronized String newVente(float prix, String libelle, String pseudo) {
         Vente vente = new Vente(prix, libelle, this.getUser(pseudo));
-        timer.schedule(new VenteASupprimer(vente), 30000);
+        timer.schedule(new VenteASupprimer(vente), TEMPS_VENTE);
         this.ventes.put(vente.getId(), vente);
         for (Map.Entry<String, HandleServer> t : mapThreads.entrySet()) {
-            if(t.getKey()!=pseudo) t.getValue().out.println("⚠ ["+pseudo+"] a ajouté une nouvelle vente : ["+libelle+"] à ["+prix+"].");
+            if (t.getKey() != pseudo)
+                t.getValue().out.println("⚠ [" + pseudo + "] a ajouté une nouvelle vente : [" + libelle + "] à [" + prix + "].");
         }
         return "La vente suivante : " + vente.getLibelle() + ", a bien été mise en vente";
     }
@@ -57,7 +60,7 @@ public class Gestionnaire {
         for (Map.Entry v : ventes.entrySet()) {
             chaine = chaine + v + "\n";
         }
-        return "Liste des ventes :\nId, intitulé, meilleure offre, vendeur, meilleur enchérisseur\n" + chaine;
+        return chaine.isEmpty() ? "⚠ Aucune vente en cours." : "Liste des ventes :\nId, intitulé, meilleure offre, vendeur, meilleur enchérisseur\n" + chaine;
     }
 
     public synchronized String historique() {
@@ -87,8 +90,8 @@ public class Gestionnaire {
      */
     public synchronized int idVenteCorrect(int id, String pseudo) {
         if (!ventes.containsKey(id)) return 0;
-        else if (pseudo.equals(ventes.get(id).getProprietaire())) return 1;
-        else return 2;
+        if (pseudo.equals(ventes.get(id).getProprietaire().getPseudo())) return 1;
+        return 2;
     }
 
     /**
@@ -100,7 +103,7 @@ public class Gestionnaire {
      * @return true if prix suffisant, false else
      */
     public synchronized Boolean encherir(int id, float nouveauPrix, String pseudo) {
-        if (this.getPrix(id) * 1.1 > nouveauPrix) {
+        if (this.getPrix(id) * (1 + SEUIL_MIN) > nouveauPrix) {
             return false;
         } else {
             Vente v = ventes.get(id);
